@@ -9,11 +9,11 @@ public class CreateData {
 	public static void main(String[] args) throws IOException{
 		String currentPath = new File(".").getCanonicalPath();
 		BufferedWriter bw = new BufferedWriter(
-		          new FileWriter(new File(currentPath + File.separator + "data.txt")));
+		          new FileWriter(new File(currentPath + File.separator + "data2.txt")));
 		for (int i = 0; i <= 500; i++) {
 			for(int j = 0;j< 5;j++){
 				double d = Math.random();
-				bw.write(d+" ");
+				bw.write(d+",");
 			}
 			bw.write("\n");
 		     

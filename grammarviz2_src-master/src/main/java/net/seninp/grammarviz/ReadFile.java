@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ReadFile {
     /**
-     * ¶ÁÈ¡ÎÄ¼þ
+     * ï¿½ï¿½È¡ï¿½Ä¼ï¿½
      * @param filePath
      * @return
      */
@@ -30,10 +30,10 @@ public class ReadFile {
                 }
                 read.close();
             } else {
-                System.out.println("ÕÒ²»µ½ÎÄ¼þ");
+                System.out.println("ï¿½Ò²ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½");
             }
         } catch (Exception e) {
-            System.out.println("³ö´íÁË");
+            System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             e.printStackTrace();
         }
         return list;
@@ -41,7 +41,7 @@ public class ReadFile {
     }
       
     /**
-     * ´´½¨¶þÎ¬Êý×é
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½
      * @param list
      * @return
      * @throws IOException 
@@ -52,7 +52,7 @@ public class ReadFile {
         double array[][] = new double[list.size()][];
         for(int i=0;i<list.size();i++){
             String linetxt=list.get(i);
-            String[] myArray = linetxt.replaceAll("\\s+", "@").split("@");
+            String[] myArray = linetxt.replaceAll(",", "@").split("@");
             array[i] = new double[myArray.length];
             for(int j=0;j<myArray.length;j++){
             	array[i][j]=Double.valueOf(myArray[j]);
@@ -68,7 +68,7 @@ public class ReadFile {
     }
       
     /**
-     * ´òÓ¡Êý×é
+     * ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
      * @param array
      */
     public static void printArray(String array[][]){

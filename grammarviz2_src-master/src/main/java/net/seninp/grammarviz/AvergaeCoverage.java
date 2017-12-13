@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,6 +142,17 @@ public class AvergaeCoverage {
       LOGGER.info("Reading data ...");
       ReadFile fr = new ReadFile();
       double[][] multiseries = fr.createArray(GrammarVizAnomalyParameters.IN_FILE);
+      List<String> ls = fr.readTxtFile("kddcup.data_10_percent_corrected");
+      boolean[] label = new boolean[ls.size()];
+      int ii = 0;
+      for(String s:ls) {
+    	  if(s.indexOf("normal")==-1) {
+    		  label[ii] = false;
+    	  }else {
+    		  label[ii] = true;
+    	  }
+    	  ii++;
+      }
       //double[] series = tp.readTS(GrammarVizAnomalyParameters.IN_FILE, 0);
       LOGGER.info("read " + multiseries[0].length + " points from " + GrammarVizAnomalyParameters.IN_FILE);
 
@@ -157,10 +169,10 @@ public class AvergaeCoverage {
       }
       
       //Calculate average coverage
-      averageCoverage(multicoverage,GrammarVizAnomalyParameters.OUT_FILE);
+      averageCoverage(multicoverage,GrammarVizAnomalyParameters.OUT_FILE,label);
     }
   }
-  private static void averageCoverage(int[][] ac,String outputPrefix) throws IOException{
+  private static void averageCoverage(int[][] ac,String outputPrefix,boolean[] label) throws IOException{
 	  int[] multmax = new int[ac.length];
 	  for(int i=0;i< ac.length;i++){
 		  int max = 0;
@@ -191,6 +203,48 @@ public class AvergaeCoverage {
 	      }
 	      bw.close();
 	  }
+	  List<String> anomal = new LinkedList<String>();
+	  boolean flag = false;
+	  String str="";
+	  double ruleThreshold = 0.12;
+	  for(int i = 0; i< averageCoverage.length;i++) {
+		  if(averageCoverage[i]/ac.length<ruleThreshold) {
+			  if(flag == false) {
+				  flag = true;
+				  str = "["+i+"-";
+			  }
+		  }else {
+			  if(flag == true) {
+				  flag = false;
+				  str += (i-1+"]");
+				  anomal.add(str);
+			  }
+		  }
+	  }
+	  int tt=0,tf=0,ft=0,ff=0;
+	  for(int i = 0; i< averageCoverage.length;i++) {
+		  if(averageCoverage[i]/ac.length<ruleThreshold) {
+			  if(label[i]==true) {
+				  tf++;
+			  }else{
+				  ff++;
+			  }
+		  }else {
+			  if(label[i]==true) {
+				  tt++;
+			  }else {
+				  ft++;
+			  }
+		  }
+	  }
+	  if(anomal.isEmpty()==true) {
+		  System.out.println("No anormal packets");
+	  }else {
+		  String s = "found "+anomal.size()+" intervals rules coverage smaller than "+ ruleThreshold +" :";
+		  for(String ss:anomal) s+=(" "+ss);
+		  System.out.println(s);
+	  }
+	  System.out.println("tt: "+tt+ " tf: "+tf+" ft: "+ft+" ff: "+ff);
 	  
   }
   private static void findRRAExperiment(double[] ts, String boundaries,
