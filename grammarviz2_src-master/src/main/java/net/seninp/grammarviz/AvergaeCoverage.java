@@ -244,7 +244,8 @@ public class AvergaeCoverage {
 		  for(String ss:anomal) s+=(" "+ss);
 		  System.out.println(s);
 	  }
-	  System.out.println("tt: "+tt+ " tf: "+tf+" ft: "+ft+" ff: "+ff);
+	  System.out.println("N-N: "+tt+ " N-A: "+tf+" A-N: "+ft+" A-A: "+ff);
+	  System.out.printf("Correctness: %.1f %%",1.0*(tt+ff)/(tt+ff+tf+ft)*100);
 	  
   }
   private static void findRRAExperiment(double[] ts, String boundaries,
