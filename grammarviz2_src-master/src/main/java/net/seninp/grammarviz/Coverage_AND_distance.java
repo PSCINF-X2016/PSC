@@ -92,7 +92,7 @@ public class Coverage_AND_distance {
           .append(CR);
       sb.append(" Num. of discords to report:  ").append(GrammarVizAnomalyParameters.DISCORDS_NUM)
           .append(CR);
-
+      /**
       if (!(AnomalyAlgorithm.RRASAMPLED.equals(GrammarVizAnomalyParameters.ALGORITHM)
           || AnomalyAlgorithm.EXPERIMENT.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
         sb.append(" SAX sliding window size:     ")
@@ -133,11 +133,13 @@ public class Coverage_AND_distance {
         sb.append(" Subsampling fraction:        ")
             .append(GrammarVizAnomalyParameters.SUBSAMPLING_FRACTION).append(CR);
       }
+      **/
 
       System.out.println(sb.toString());
 
       // read the file
       //
+      
       LOGGER.info("Reading data ...");
       ReadFile fr = new ReadFile();
       double[][] multiseries = fr.createArray(GrammarVizAnomalyParameters.IN_FILE);
@@ -149,7 +151,7 @@ public class Coverage_AND_distance {
       int[][] multicoverage = new int[multiseries.length][];
       for(int i = 0;i<multiseries.length;i++){
     	  
-    	  multicoverage[i] = findRRA(multiseries[i], GrammarVizAnomalyParameters.SAX_WINDOW_SIZE,
+    	  multicoverage[i] = findRRA_Coverage(multiseries[i], GrammarVizAnomalyParameters.SAX_WINDOW_SIZE,
             GrammarVizAnomalyParameters.SAX_PAA_SIZE, GrammarVizAnomalyParameters.SAX_ALPHABET_SIZE,
             GrammarVizAnomalyParameters.SAX_NR_STRATEGY, GrammarVizAnomalyParameters.DISCORDS_NUM,
             GrammarVizAnomalyParameters.GI_ALGORITHM_IMPLEMENTATION,
@@ -169,47 +171,19 @@ public class Coverage_AND_distance {
             GrammarVizAnomalyParameters.OUT_FILE, GrammarVizAnomalyParameters.SAX_NORM_THRESHOLD);
       }
       //give the distance with normalization and weight(weight to be precise)
-      distanceGiver(multdistance,GrammarVizAnomalyParameters.OUT_FILE);
+      distanceGiver(multdistance,10,GrammarVizAnomalyParameters.OUT_FILE);
       
     }
   }
-  
-  
-  //sum with weight
-  private static double [] sumWithW(double [][] ts , double [] weight) {
-	  double[][]multextrem = new double[2][ts.length];
-	  //find the max and min for every dimension
-	  for(int i=0;i< ts.length;i++){
-		  double max = -1;
-		  for(int j = 0;j<ts[i].length;j++){
-			  if(max<ts[i][j]){
-				  max = ts[i][j];
-			  }
-		  }
-		  
-		  multextrem[0][i]= max;
-		  double min=max;
-		  for (int j=0;j<ts[i].length;j++) {
-			  if(min>ts[i][j])
-				  min=ts[i][j];
-		  }
-		  multextrem[1][i]=min;
-	  }
+  public static double tanh(double x) {
+	  double e=Math.exp(2*x);
 	  
-	  
-	  int s=weight.length;
-	  double[] res=new double[ts[0].length];
-	  for (int j=0;j!=ts[0].length;j++) {//j=number of colone
-		  for(int i=0;i!=s;i++) {
-			  res[j]=res[j]+(ts[i][j]-multextrem[1][i])/(multextrem[0][i]-multextrem[1][i])*weight[i];
-		  }
-	  }
-	  return res;
+	  return (e-1)/(e+1);
   }
-  
+ 
   
   //output file with distance non self match
-  private static void distanceGiver(double [][]distance,String outputPrefix) throws IOException{
+  private static void distanceGiver(double [][]distance,double distance_rate , String outputPrefix) throws IOException{
 	  
 	  
 	  //normalized distance
@@ -217,7 +191,7 @@ public class Coverage_AND_distance {
 	  double [] weight=new double[distance.length];
 	  for(int i=0;i!=weight.length;i++)
 		  weight[i]=1;
-	  double [] nd=sumWithW(distance, weight);
+	  double [] nd=sumD(distance,distance_rate);
 	  
 	  if (!(outputPrefix.isEmpty())) {
 
@@ -777,7 +751,7 @@ public class Coverage_AND_distance {
    * @param normalizationThreshold SAX normalization threshold.
    * @throws Exception if error occurs.
    */
-  private static int[] findRRA(double[] ts, int windowSize, int paaSize, int alphabetSize,
+  private static int[] findRRA_Coverage(double[] ts, int windowSize, int paaSize, int alphabetSize,
       NumerosityReductionStrategy saxNRStrategy, int discordsToReport, GIAlgorithm giImplementation,
       String outputPrefix, double normalizationThreshold) throws Exception {
 
@@ -1206,4 +1180,202 @@ public class Coverage_AND_distance {
     }
     return res;
   }
+  
+  public static double[]Average_Coverage(double [][] multiseries) throws Exception{
+	  GrammarVizAnomalyParameters params = new GrammarVizAnomalyParameters();
+	  //JCommander jct = new JCommander(params, args);
+	  //if (0 == args.length) {
+	  //    jct.usage();
+	  //    return null;
+	   // }
+	    //else {
+	      // get params printed
+	      //
+	      StringBuffer sb = new StringBuffer(1024);
+	      sb.append(CR).append("GrammarViz2 CLI anomaly discovery").append(CR);
+	      sb.append("parameters:").append(CR);
+
+	      sb.append(" input file:                  ").append(GrammarVizAnomalyParameters.IN_FILE)
+	          .append(CR);
+	      sb.append(" output files prefix:         ").append(GrammarVizAnomalyParameters.OUT_FILE)
+	          .append(CR);
+
+	      sb.append(" Algorithm implementation:    ").append(GrammarVizAnomalyParameters.ALGORITHM)
+	          .append(CR);
+	      sb.append(" Num. of discords to report:  ").append(GrammarVizAnomalyParameters.DISCORDS_NUM)
+	          .append(CR);
+	      
+	      if (!(AnomalyAlgorithm.RRASAMPLED.equals(GrammarVizAnomalyParameters.ALGORITHM)
+	          || AnomalyAlgorithm.EXPERIMENT.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	        sb.append(" SAX sliding window size:     ")
+	            .append(GrammarVizAnomalyParameters.SAX_WINDOW_SIZE).append(CR);
+	      }
+
+	      if (!(AnomalyAlgorithm.BRUTEFORCE.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	        if (!(AnomalyAlgorithm.RRASAMPLED.equals(GrammarVizAnomalyParameters.ALGORITHM)
+	            || AnomalyAlgorithm.EXPERIMENT.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	          sb.append(" SAX PAA size:                ")
+	              .append(GrammarVizAnomalyParameters.SAX_PAA_SIZE).append(CR);
+	          sb.append(" SAX alphabet size:           ")
+	              .append(GrammarVizAnomalyParameters.SAX_ALPHABET_SIZE).append(CR);
+	        }
+	        sb.append(" SAX numerosity reduction:    ")
+	            .append(GrammarVizAnomalyParameters.SAX_NR_STRATEGY).append(CR);
+	        sb.append(" SAX normalization threshold: ")
+	            .append(GrammarVizAnomalyParameters.SAX_NORM_THRESHOLD).append(CR);
+	      }
+
+	      //LOGGER.info("Reading data ...");
+	      //ReadFile fr = new ReadFile();
+	      //double[][] multiseries = fr.createArray(GrammarVizAnomalyParameters.IN_FILE);
+	      LOGGER.info("read " + multiseries[0].length + " points from " + GrammarVizAnomalyParameters.IN_FILE);
+	      
+	      // switch logic according to the algorithm selection
+	      //
+	      int[][] multicoverage = new int[multiseries.length][];
+	      for(int i = 0;i<multiseries.length;i++){
+	    	  
+	      multicoverage[i] = findRRA_Coverage(multiseries[i], GrammarVizAnomalyParameters.SAX_WINDOW_SIZE,
+	            GrammarVizAnomalyParameters.SAX_PAA_SIZE, GrammarVizAnomalyParameters.SAX_ALPHABET_SIZE,
+	            GrammarVizAnomalyParameters.SAX_NR_STRATEGY, GrammarVizAnomalyParameters.DISCORDS_NUM,
+	            GrammarVizAnomalyParameters.GI_ALGORITHM_IMPLEMENTATION,
+	            GrammarVizAnomalyParameters.OUT_FILE, GrammarVizAnomalyParameters.SAX_NORM_THRESHOLD);
+	      }
+	      int[] multmax = new int[multicoverage.length];
+		  for(int i=0;i< multicoverage.length;i++){
+			  int max = 0;
+			  for(int j = 0;j<multicoverage[i].length;j++){
+				  if(max<multicoverage[i][j]){
+					  max = multicoverage[i][j];
+				  }
+			  }
+			  multmax[i] = max;
+		  }
+		  //Centralize first and then sum up
+		  int NumFea=multicoverage.length;
+		  double[] averageCoverage = new double[multicoverage[0].length];
+		  for(int j = 0; j < multicoverage[0].length;j++){
+			  for(int i = 0;i< multicoverage.length;i++){
+				  averageCoverage[j] += 1.0*multicoverage[i][j]/(1.0*NumFea*multmax[i]);
+			  }
+		  }
+		  
+		  return averageCoverage;
+	 //   }
+	  
+  }
+  
+  
+  public static double[]Distance(double[][] multiseries,double distance_rate) throws Exception{
+	  GrammarVizAnomalyParameters params = new GrammarVizAnomalyParameters();
+	  //JCommander jct = new JCommander(params, args);
+	  //if (0 == args.length) {
+	   //   jct.usage();
+	  //    return null;
+	  //  }
+	  //else {
+	       //get params printed
+	      
+	      StringBuffer sb = new StringBuffer(1024);
+	      sb.append(CR).append("GrammarViz2 CLI anomaly discovery").append(CR);
+	      sb.append("parameters:").append(CR);
+
+	      sb.append(" input file:                  ").append(GrammarVizAnomalyParameters.IN_FILE)
+	          .append(CR);
+	      sb.append(" output files prefix:         ").append(GrammarVizAnomalyParameters.OUT_FILE)
+	          .append(CR);
+
+	      sb.append(" Algorithm implementation:    ").append(GrammarVizAnomalyParameters.ALGORITHM)
+	          .append(CR);
+	      sb.append(" Num. of discords to report:  ").append(GrammarVizAnomalyParameters.DISCORDS_NUM)
+	          .append(CR);
+	      
+	      if (!(AnomalyAlgorithm.RRASAMPLED.equals(GrammarVizAnomalyParameters.ALGORITHM)
+	          || AnomalyAlgorithm.EXPERIMENT.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	        sb.append(" SAX sliding window size:     ")
+	            .append(GrammarVizAnomalyParameters.SAX_WINDOW_SIZE).append(CR);
+	      }
+
+	      if (!(AnomalyAlgorithm.BRUTEFORCE.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	        if (!(AnomalyAlgorithm.RRASAMPLED.equals(GrammarVizAnomalyParameters.ALGORITHM)
+	            || AnomalyAlgorithm.EXPERIMENT.equals(GrammarVizAnomalyParameters.ALGORITHM))) {
+	          sb.append(" SAX PAA size:                ")
+	              .append(GrammarVizAnomalyParameters.SAX_PAA_SIZE).append(CR);
+	          sb.append(" SAX alphabet size:           ")
+	              .append(GrammarVizAnomalyParameters.SAX_ALPHABET_SIZE).append(CR);
+	        }
+	        sb.append(" SAX numerosity reduction:    ")
+	            .append(GrammarVizAnomalyParameters.SAX_NR_STRATEGY).append(CR);
+	        sb.append(" SAX normalization threshold: ")
+	            .append(GrammarVizAnomalyParameters.SAX_NORM_THRESHOLD).append(CR);
+	      }
+
+	      //LOGGER.info("Reading data ...");
+	      //ReadFile fr = new ReadFile();
+	      //double[][] multiseries = fr.createArray(GrammarVizAnomalyParameters.IN_FILE);
+	      LOGGER.info("read " + multiseries[0].length + " points from " + GrammarVizAnomalyParameters.IN_FILE);
+	      
+	      // switch logic according to the algorithm selection
+	      //
+	      double [][]multdistance=new double [multiseries.length][];
+	      for(int i = 0;i<multiseries.length;i++){
+	    	  
+	    	    multdistance[i] = findRRA_distance(multiseries[i], GrammarVizAnomalyParameters.SAX_WINDOW_SIZE,
+	            GrammarVizAnomalyParameters.SAX_PAA_SIZE, GrammarVizAnomalyParameters.SAX_ALPHABET_SIZE,
+	            GrammarVizAnomalyParameters.SAX_NR_STRATEGY, GrammarVizAnomalyParameters.DISCORDS_NUM,
+	            GrammarVizAnomalyParameters.GI_ALGORITHM_IMPLEMENTATION,
+	            GrammarVizAnomalyParameters.OUT_FILE, GrammarVizAnomalyParameters.SAX_NORM_THRESHOLD);
+	      }
+	      //System.out.println(multdistance[1][1]);
+		  double [] nd=sumD(multdistance,distance_rate);
+	      return nd;
+	 //   }
+	  
+  }
+  
+  //sum with weight
+  public static double [] sumD(double [][] ts,double distance_rate ) {
+	  double[][]multextrem = new double[ts.length][2];
+	  //find the max and min for every dimension
+	  int NumFea=ts.length;
+	  for(int i=0;i< ts.length;i++){
+		  double max = ts[i][0];
+		  for(int j = 0;j<ts[i].length;j++){
+			  if(max<ts[i][j]){
+				  max = ts[i][j];
+			  }
+		  }
+		 
+		  multextrem[i][1]= max;
+		  //System.out.println(max);
+		  double min=max;
+		  for (int j=0;j<ts[i].length;j++) {
+			  if(min>ts[i][j])
+				  min=ts[i][j];
+		  }
+		  multextrem[i][0]=min;
+	  }
+	  // Rectifying distance
+	  
+	  
+	  
+	  
+	  //sum with normalization for every line(rang)
+	  double[] res=new double[ts[0].length];
+	  
+	  for (int i=0;i!=ts.length;i++) {
+		  double min=multextrem[i][0];
+		  double md=multextrem[i][1]-min;
+		  double mid=(md)/distance_rate;
+		  if(md==0)
+			  continue;
+		  for (int j=0;j<ts[0].length;j++) {
+			 res[j]=res[j]+tanh((ts[i][j]-min)/mid);
+		  }
+	  };
+	  
+	  return res;
+  }
+  
+  
 }
