@@ -4,17 +4,19 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class AnomalyDetection {
 	public static void main(String[]args) throws Exception {
 		
 
 		double [][] mult=File2MultiSeries("C:\\Users\\TeTe\\Desktop\\grammarviz2_src-master\\data.txt");
-		System.out.println("hello there!");
+		//System.out.println("hello there!");
 		
 		double[] tt=AverageCoverage( mult);
+		
 		//double[] tt1=NonSelfMatchDistance(mult,10);
-	
+		tt=Threshold(tt,0.9);
 		FromArray2File(tt,"test20","averageCoverage");
 		//FromArray2File(tt1,"test21","NonSelfMatchDistance");
 		
@@ -31,7 +33,33 @@ public class AnomalyDetection {
 		}
 		*/
 	}
-	
+	public static double [] Threshold(double [] AnormalList, double threshold) {
+		double [] temp=Coverage_AND_distance.Normalisation(AnormalList);
+		double [] anormal=temp;
+		for(int i=0;i<AnormalList.length;i++) {
+			if(temp[i]>threshold) {
+				anormal[i]=1;
+			}
+			else
+				anormal[i]=0;
+		}
+		return anormal;
+	}
+	public static double [] AnormalPercentage(double []anormal , double percentage) {
+		double[]temp=anormal;
+		assert(percentage<1);
+		Arrays.sort(anormal);
+		int index=(int) (percentage*anormal.length);
+		double threshold=anormal[index];
+		for(int i=0;i<anormal.length;i++) {
+			if(temp[i]>threshold) {
+				anormal[i]=1;
+			}
+			else
+				anormal[i]=0;
+		}
+		return anormal;
+	}
 	/**
 	 * From file to a multi sereies
 	 * @param Filename

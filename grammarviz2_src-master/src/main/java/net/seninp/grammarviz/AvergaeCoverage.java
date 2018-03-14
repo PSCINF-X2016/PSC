@@ -1016,4 +1016,19 @@ public class AvergaeCoverage {
     }
     return res;
   }
+  public static double[] Normalisation(double[] Datas) {
+	  double max=Datas[0];
+	  int len=Datas.length;
+	  for(int i =0;i<len;i++) {
+		  if (Datas[i]>max) {
+			  max=Datas[i];
+		  }
+	  }
+	  double [] normalisation=Datas;
+	  for(int i=0; i<len;i++) {
+		  normalisation[i]=Datas[i]/max;
+	  }
+	  return normalisation;
+  }
 }
+
